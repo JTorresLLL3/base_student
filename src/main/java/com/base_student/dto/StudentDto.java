@@ -36,4 +36,8 @@ public class StudentDto {
         return new ObjectMapper().writeValueAsString(this);
     }
 
+    public record StudentRsDto(String message, Integer id) {
+
+    }
+
 }

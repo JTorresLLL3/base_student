@@ -21,4 +21,14 @@ public class StudentService {
         return studentRepository.findAll().stream().map(StudentModel::toDto).toList();
     }
 
+    public StudentDto findById(Integer id) {
+        return studentRepository.findById(id)
+                .map(StudentModel::toDto)
+                .orElse(null);
+    }
+
+    public StudentRsDto create(StudentDto studentDto) {
+        Integer id = studentRepository.save(dto.toModel()).getId();
+        return new StudentRsDto("Student added", id);
+    }
 }
