@@ -11,7 +11,8 @@ import tools.jackson.databind.ObjectMapper;
 
 /**
  * Representa el objeto de transferencia de datos (DTO) de un estudiante.
- * Se utiliza para transportar la información del estudiante entre capas de la aplicación,
+ * Se utiliza para transportar la información del estudiante entre capas de la
+ * aplicación,
  * especialmente en solicitudes y respuestas HTTP.
  *
  * @author base_student
@@ -24,7 +25,8 @@ import tools.jackson.databind.ObjectMapper;
 public class StudentDto {
     /**
      * Identificador del estudiante.
-     * Se ignora durante la serialización JSON para evitar exponerlo en entidades externas.
+     * Se ignora durante la serialización JSON para evitar exponerlo en entidades
+     * externas.
      */
     @JsonIgnore
     private Integer id;
@@ -49,8 +51,11 @@ public class StudentDto {
      */
     private String eMail;
 
+    private float peso;
+
     /**
-     * Convierte esta representación DTO en un objeto de dominio {@link StudentModel}.
+     * Convierte esta representación DTO en un objeto de dominio
+     * {@link StudentModel}.
      *
      * @return instancia de {@link StudentModel} con los valores actuales del DTO
      */
