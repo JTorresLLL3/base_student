@@ -34,6 +34,14 @@ public class StudentController {
         return new ResponseEntity<>(studentDtos, HttpStatus.OK);
     }
 
+    private void anotherUselessMethod(){
+        System.out.println("I'm useless ... Yei!!!");
+    }
+
+
+
+
+
     @PostMapping
     public ResponseEntity<?> save(@RequestBody StudentDto studentDto) throws BusinessException {
         validationUtil.validate(studentDto);
