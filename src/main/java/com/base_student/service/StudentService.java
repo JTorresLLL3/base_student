@@ -27,4 +27,8 @@ public class StudentService {
         return new StudentRsDto("Student added", id);
     }
 
+    public void deleteById(Integer id) {
+        studentRepository.deleteById(id);
+    }
+
 }
