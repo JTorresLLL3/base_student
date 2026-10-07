@@ -27,4 +27,8 @@ public class StudentController {
         return new ResponseEntity<>(studentDtos, HttpStatus.OK);
     }
 
+    private void method(){
+        System.out.println("Hello word!!!");
+    }
+
 }
