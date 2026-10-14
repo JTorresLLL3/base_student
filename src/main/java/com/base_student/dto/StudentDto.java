@@ -31,24 +31,10 @@ public class StudentDto {
     @JsonIgnore
     private Integer id;
 
-    /**
-     * Nombre del estudiante.
-     */
+
     private String name;
-
-    /**
-     * Apellido del estudiante.
-     */
     private String lastName;
-
-    /**
-     * Número telefónico del estudiante.
-     */
     private String phone;
-
-    /**
-     * Correo electrónico del estudiante.
-     */
     private String eMail;
 
     private float peso;
