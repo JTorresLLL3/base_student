@@ -11,24 +11,14 @@ public class ValidationUtil {
 
     public void validate(StudentDto studentDto) throws BusinessException {
 
-        if (Strings.isBlank(studentDto.getEMail())
+        if (Strings.isBlank(studentDto.eMail())
                 || !Pattern.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
-                        studentDto.getEMail())) {
-            throw BusinessException.builder()
-                    .message("El email no tiene un formato válido")
-                    .build();
+                        studentDto.eMail())) {
+            throw new BusinessException("El email no tiene un formato válido");
         }
 
-        if (Strings.isBlank(studentDto.getName())) {
-            throw BusinessException.builder()
-                    .message("El nombre no debe estar vacío")
-                    .build();
-        }
-
-        if (studentDto.getPeso() <= 0) {
-            throw BusinessException.builder()
-                    .message("El peso no debe ser negativo")
-                    .build();
+        if (Strings.isBlank(studentDto.name())) {
+            throw new BusinessException("El nombre no debe estar vacío");
         }
 
     }
