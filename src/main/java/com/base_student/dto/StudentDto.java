@@ -1,12 +1,10 @@
 package com.base_student.dto;
 
 import com.base_student.model.StudentModel;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import tools.jackson.databind.ObjectMapper;
 
 public record StudentDto(
-        @JsonIgnore Integer id,
+        Integer id,
         String name,
         String lastName,
         String phone,
