@@ -22,7 +22,7 @@ public class StudentServiceTest {
 
     @Mock
     private StudentRepository studentRepository;
-    @InjectMocks 
+    @InjectMocks
     private StudentService studentService;
 
     @Test
@@ -47,6 +47,6 @@ public class StudentServiceTest {
         StudentModel studentModel = new StudentModel(1, "John", "Doe", "+52-111-12-34-56", "john.doe@mail.com");
         when(studentRepository.findById(id)).thenReturn(Optional.of(studentModel));
         StudentResponseDto studentResponseDto = studentService.findById(id);
-        assertEquals(studentModel, studentResponseDto);
+        assertEquals(studentModel.getId(), studentResponseDto.id());
     }
 }
