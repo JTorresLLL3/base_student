@@ -3,8 +3,8 @@ package com.base_student.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
-import com.base_student.dto.StudentDto;
-import com.base_student.dto.StudentRsDto;
+import com.base_student.dto.StudentRequestDto;
+import com.base_student.dto.StudentResponseDto;
 import com.base_student.exception.BusinessException;
 import com.base_student.model.StudentModel;
 import com.base_student.respository.StudentRepository;
@@ -18,17 +18,16 @@ public class StudentService {
         this.studentRepository = studentRepository;
     }
 
-    public List<StudentDto> findAll() {
+    public List<StudentResponseDto> findAll() {
         return studentRepository.findAll().stream().map(StudentModel::toDto).toList();
     }
 
-    public StudentDto findById(Integer id) throws BusinessException {
+    public StudentResponseDto findById(Integer id) throws BusinessException {
         return studentRepository.findById(id).get().toDto();
     }
 
-    public StudentRsDto create(StudentDto dto) {
-        Integer id = studentRepository.save(dto.toModel()).getId();
-        return new StudentRsDto("Student added", id);
+    public StudentResponseDto create(StudentRequestDto dto) {
+        return studentRepository.save(dto.toModel()).toDto();
     }
 
     public void deleteById(Integer id) {

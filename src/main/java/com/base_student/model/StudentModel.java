@@ -1,6 +1,7 @@
 package com.base_student.model;
 
-import com.base_student.dto.StudentDto;
+import com.base_student.dto.StudentRequestDto;
+import com.base_student.dto.StudentResponseDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -57,8 +58,8 @@ public class StudentModel {
         return eMail;
     }
 
-    public StudentDto toDto() {
-        return new StudentDto(
+    public StudentResponseDto toDto() {
+        return new StudentResponseDto(
                 this.id,
                 this.name,
                 this.lastName,
