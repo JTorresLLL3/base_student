@@ -1,6 +1,5 @@
 package com.base_student.model;
 
-import com.base_student.dto.StudentRequestDto;
 import com.base_student.dto.StudentResponseDto;
 
 import jakarta.persistence.Column;

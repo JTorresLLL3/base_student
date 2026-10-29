@@ -1,4 +1,6 @@
 package com.base_student.dto;
 
-public record ErrorMessageDto(String message, String httpStatus) {
+import org.springframework.http.HttpStatus;
+
+public record ErrorMessageDto(String message, HttpStatus httpStatus, Long timestamp) {
 }

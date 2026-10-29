@@ -1,18 +1,23 @@
 package com.base_student.exception;
 
-public class BusinessException extends Exception {
-    private String message;
+import com.base_student.dto.ErrorMessageDto;
 
-    public BusinessException(String message) {
-        super(message);
+public class BusinessException extends RuntimeException {
+
+    private String message;
+    private ErrorMessageDto errorMessageDto;
+
+    public BusinessException(ErrorMessageDto errorMessageDto) {
+        super(errorMessageDto.message());
+        this.errorMessageDto = errorMessageDto;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public ErrorMessageDto getErrorMessageDto() {
+        return errorMessageDto;
     }
 
 }
