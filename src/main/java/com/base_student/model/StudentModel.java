@@ -24,7 +24,7 @@ public class StudentModel {
     @Column(name = "phone", columnDefinition = "varchar(20)")
     private String phone;
     @Column(name = "email", columnDefinition = "varchar(80)", unique = true)
-    private String eMail;
+    private String email;
 
     public StudentModel() {
     }
@@ -34,7 +34,7 @@ public class StudentModel {
         this.name = name;
         this.lastName = lastName;
         this.phone = phone;
-        this.eMail = eMail;
+        this.email = eMail;
     }
 
     public Integer getId() {
@@ -53,8 +53,8 @@ public class StudentModel {
         return phone;
     }
 
-    public String geteMail() {
-        return eMail;
+    public String getEmail() {
+        return email;
     }
 
     public StudentResponseDto toDto() {
@@ -63,7 +63,7 @@ public class StudentModel {
                 this.name,
                 this.lastName,
                 this.phone,
-                this.eMail);
+                this.email);
     }
 
     @Override

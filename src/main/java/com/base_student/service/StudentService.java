@@ -12,6 +12,7 @@ import com.base_student.model.StudentModel;
 import com.base_student.respository.StudentRepository;
 import com.base_student.util.DatetimeUtil;
 
+import static com.base_student.constants.Constants.RECORD_ALLREADY_EXISTS;
 import static com.base_student.constants.Constants.RECORD_NOT_FOUND;
 
 @Service
@@ -36,6 +37,13 @@ public class StudentService {
     }
 
     public StudentResponseDto create(StudentRequestDto dto) {
+        if (studentRepository.existsByEmail(dto.eMail())) {
+            throw new BusinessException(
+                    new ErrorMessageDto(
+                            RECORD_ALLREADY_EXISTS,
+                            HttpStatus.CONFLICT,
+                            DatetimeUtil.getTimestamptInMilliseconds()));
+        }
         return studentRepository.save(dto.toModel()).toDto();
     }
 

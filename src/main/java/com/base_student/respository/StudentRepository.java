@@ -7,4 +7,5 @@ import com.base_student.model.StudentModel;
 
 @Repository
 public interface StudentRepository extends JpaRepository<StudentModel, Integer> {
+    Boolean existsByEmail(String eMail);
 }
