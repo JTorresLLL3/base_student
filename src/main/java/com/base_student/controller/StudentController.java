@@ -1,5 +1,8 @@
 package com.base_student.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,6 +21,7 @@ import com.base_student.service.StudentService;
 
 @Controller
 @RequestMapping("${api.student.url}")
+@Tag(name = "Students", description = "Student management operations")
 public class StudentController {
 
     private final StudentService studentService;
@@ -29,6 +33,7 @@ public class StudentController {
     }
 
     @PostMapping
+    @Operation(summary = "Create a student", description = "Creates a new student record")
     public ResponseEntity<?> save(@RequestBody StudentRequestDto studentDto) throws BusinessException {
         validationUtil.validate(studentDto);
         StudentResponseDto rsDto = studentService.create(studentDto);
@@ -36,18 +41,25 @@ public class StudentController {
     }
 
     @GetMapping
+    @Operation(summary = "Get all students", description = "Returns all registered students")
     public ResponseEntity<?> findAll() {
         return new ResponseEntity<>(studentService.findAll(), HttpStatus.OK);
     }
 
     @GetMapping(value = "/find-by-id")
-    public ResponseEntity<?> findById(@RequestParam(value = "id", required = false) Integer id)
+    @Operation(summary = "Find a student by ID", description = "Returns the student matching the supplied ID")
+    public ResponseEntity<?> findById(
+            @Parameter(description = "Student ID")
+            @RequestParam(value = "id", required = false) Integer id)
             throws BusinessException {
         return new ResponseEntity<>(studentService.findById(id), HttpStatus.OK);
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deleteById(@RequestParam(value = "id", required = false) Integer id) {
+    @Operation(summary = "Delete a student by ID", description = "Deletes the student matching the supplied ID")
+    public ResponseEntity<?> deleteById(
+            @Parameter(description = "Student ID")
+            @RequestParam(value = "id", required = false) Integer id) {
         studentService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }

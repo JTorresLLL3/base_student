@@ -1,6 +1,14 @@
 # Base Student
 
-Base Student is a Spring Boot application scaffold for managing student records. The project currently contains the application entry point and a JPA entity; API, persistence, and service layers are not implemented yet.
+Base Student is a REST API built with Spring Boot for managing student records. It exposes CRUD operations backed by PostgreSQL through Spring Data JPA, and documents the API with Springdoc OpenAPI.
+
+## Features
+
+- Create, list, find, and delete students
+- Validate student names and email addresses
+- Map persistence models to response DTOs
+- Return structured business errors for invalid or missing records
+- Expose interactive OpenAPI/Swagger documentation
 
 ## Technology Stack
 
@@ -10,14 +18,14 @@ Base Student is a Spring Boot application scaffold for managing student records.
 - Spring Data JPA
 - Spring MVC
 - PostgreSQL JDBC driver
-- Lombok
-- JUnit 5 and Spring Boot test support
+- Springdoc OpenAPI 3
+- Maven Surefire and Spring Boot test starters
 
 ## Requirements
 
 - JDK 21 or newer
-- No separate Maven installation is required; use the included Maven Wrapper.
-- PostgreSQL is required once the JPA persistence layer is connected to a database.
+- PostgreSQL running locally or at a reachable host
+- No separate Maven installation; use the included Maven Wrapper
 
 ## Getting Started
 
@@ -28,19 +36,13 @@ git clone <repository-url>
 cd base_student
 ```
 
-Run the test suite:
+Create the PostgreSQL database expected by the default configuration:
 
-```bash
-./mvnw test
+```sql
+CREATE DATABASE student;
 ```
 
-On Windows, use:
-
-```powershell
-.\mvnw.cmd test
-```
-
-Start the application:
+Configure the datasource as described below, then run the application on Linux/macOS:
 
 ```bash
 ./mvnw spring-boot:run
@@ -52,30 +54,75 @@ On Windows:
 .\mvnw.cmd spring-boot:run
 ```
 
-The application is configured with the name `base_student`. Spring Boot uses port `8080` by default.
+The API is available at `http://localhost:8080/student`. Swagger UI is available at `http://localhost:8080/swagger-ui/index.html` by default.
 
 ## Configuration
 
-The default configuration is in `src/main/resources/application.properties`; the development profile is in `src/main/resources/application-dev.properties`. Both files currently only define the application name.
+The default configuration is in `src/main/resources/application.properties`; development overrides are in `src/main/resources/application-dev.properties`.
 
-Although the PostgreSQL driver and Spring Data JPA are included, database connection properties have not been added yet. Before using the entity with PostgreSQL, configure a datasource, for example:
+Both profiles use:
 
 ```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/base_student
-spring.datasource.username=your_username
-spring.datasource.password=your_password
-spring.jpa.hibernate.ddl-auto=update
+spring.application.name=base_student
+server.port=8080
+spring.datasource.url=jdbc:postgresql://localhost:5432/student
+spring.datasource.username=postgres
+spring.datasource.password=<your-postgresql-password>
+spring.datasource.driver-class-name=org.postgresql.Driver
+api.student.url=/student
 ```
 
-Do not commit real credentials. Prefer environment variables or an ignored local configuration file for local development.
+Never commit a real database password. For local credentials, set an environment variable and reference it in configuration:
 
-To activate the development profile:
+```properties
+spring.datasource.password=${DB_PASSWORD}
+```
+
+Activate the development profile on Linux/macOS:
 
 ```bash
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-## Current Domain Model
+On Windows:
+
+```powershell
+.\mvnw.cmd spring-boot:run -D"spring-boot.run.profiles=dev"
+```
+
+The development properties may contain a masked password placeholder; replace it with the configured password or environment-variable reference before starting the application.
+
+## API
+
+The controller uses `/student` as its base path.
+
+| Method | Path | Description | Success status |
+| --- | --- | --- | --- |
+| `POST` | `/student` | Create a student | `200 OK` |
+| `GET` | `/student` | Return all students | `200 OK` |
+| `GET` | `/student/find-by-id?id={id}` | Find a student by ID | `200 OK` |
+| `DELETE` | `/student?id={id}` | Delete a student by ID | `200 OK` |
+
+### Student request and response
+
+```json
+{
+  "id": 1,
+  "name": "John",
+  "lastName": "Doe",
+  "phone": "+52 614 123 4567",
+  "eMail": "john.doe@example.com"
+}
+```
+
+The request `id` is provided for the DTO shape but the database generates the identity for newly saved records. `POST` validation requires:
+
+- A non-empty `name`
+- A non-empty email address matching `^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$`
+
+A missing student record returns a structured business error with `404 NOT_FOUND` and message `Record not found`. Validation failures return `400 BAD_REQUEST`.
+
+## Domain Model
 
 `StudentModel` is mapped to the `student` table:
 
@@ -87,30 +134,36 @@ To activate the development profile:
 | `phone` | `phone` | `String` | Maximum length 20 |
 | `eMail` | `email` | `String` | Maximum length 80 |
 
-Lombok provides getters, setters, constructors, `equals`, `hashCode`, `toString`, and a builder for the entity.
+JPA uses `GenerationType.IDENTITY`, so the ID is generated by PostgreSQL.
 
 ## Project Structure
 
 ```text
-src/
-├── main/
-│   ├── java/com/base_student/
-│   │   ├── BaseStudentApplication.java
-│   │   ├── controller/      # REST or MVC controllers (planned)
-│   │   ├── dto/             # Request and response DTOs (planned)
-│   │   ├── model/           # JPA entities
-│   │   ├── respository/     # Repository interfaces (planned)
-│   │   └── service/         # Application services (planned)
-│   └── resources/
-│       ├── application.properties
-│       └── application-dev.properties
-└── test/java/com/base_student/
-    └── BaseStudentApplicationTests.java
+src/main/java/com/base_student/
+├── BaseStudentApplication.java
+├── constants/       # Shared messages and utility constants
+├── controller/      # REST endpoints
+├── dto/             # API request, response, and error DTOs
+├── exception/       # Business exception and controller advice
+├── model/           # JPA entity
+├── respository/     # Spring Data repository (package name retained from source)
+├── service/         # Business operations
+└── util/            # Validation and timestamp utilities
+
+src/main/resources/
+├── application.properties
+└── application-dev.properties
 ```
 
 ## Build and Packaging
 
-Create a production JAR with:
+Run the test suite:
+
+```bash
+./mvnw test
+```
+
+Create the production JAR:
 
 ```bash
 ./mvnw clean package
@@ -124,12 +177,20 @@ java -jar target/base_student-0.0.1-SNAPSHOT.jar
 
 ## Testing
 
-The current test suite contains a Spring application context smoke test. Add controller, service, repository, and integration tests as those layers are implemented.
+No test classes are currently present under `src/test/java`. Add unit and integration coverage for validation, service behavior, repository operations, HTTP endpoints, and error responses as the application evolves.
 
-## API Status
+## Current Limitations
 
-No HTTP endpoints are currently exposed. Controllers, repositories, services, DTOs, validation, and database migrations remain to be implemented.
+- There is no dedicated update endpoint; a later improvement should add and document student updates.
+- The delete operation does not verify whether the supplied ID exists.
+- Find-by-ID accepts an optional request parameter but should validate missing or non-numeric IDs explicitly.
+- TODO tracking notes that find-by-ID support is still planned, although the endpoint is implemented in the current source.
 
 ## License
 
 No license has been specified for this project yet.
+
+
+## Author
+
+Dr. Alfonso José Barroso Barajas
