@@ -23,7 +23,7 @@ public class StudentModel {
     private String lastName;
     @Column(name = "phone", columnDefinition = "varchar(20)")
     private String phone;
-    @Column(name = "email", columnDefinition = "varchar(80)")
+    @Column(name = "email", columnDefinition = "varchar(80)", unique = true)
     private String eMail;
 
     public StudentModel() {
