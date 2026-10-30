@@ -1,6 +1,6 @@
 package com.base_student.model;
 
-import com.base_student.dto.StudentDto;
+import com.base_student.dto.StudentResponseDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,16 +8,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import tools.jackson.databind.ObjectMapper;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "student")
 public class StudentModel {
@@ -34,19 +26,48 @@ public class StudentModel {
     @Column(name = "email", columnDefinition = "varchar(80)")
     private String eMail;
 
-    public StudentDto toDto() {
-        return StudentDto.builder()
-                .id(this.id)
-                .name(this.name)
-                .lastName(this.lastName)
-                .phone(this.phone)
-                .eMail(this.eMail)
-                .build();
+    public StudentModel() {
+    }
+
+    public StudentModel(Integer id, String name, String lastName, String phone, String eMail) {
+        this.id = id;
+        this.name = name;
+        this.lastName = lastName;
+        this.phone = phone;
+        this.eMail = eMail;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public String geteMail() {
+        return eMail;
+    }
+
+    public StudentResponseDto toDto() {
+        return new StudentResponseDto(
+                this.id,
+                this.name,
+                this.lastName,
+                this.phone,
+                this.eMail);
     }
 
     @Override
     public String toString() {
         return new ObjectMapper().writeValueAsString(this);
     }
-
 }
