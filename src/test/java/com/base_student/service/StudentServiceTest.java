@@ -3,6 +3,8 @@ package com.base_student.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -31,21 +33,41 @@ public class StudentServiceTest {
     private StudentService studentService;
 
     @Test
+    @DisplayName("Should create student successfully when email is unique")
+    void shouldCreateStudentSuccessfully() {
+        StudentRequestDto studentRequestDto = new StudentRequestDto(null, "John", "Doe", "+52 123 11 22 33",
+                "j.doe@email.com");
+        StudentModel studentModel = new StudentModel(1, "John", "Doe", "+52 123 11 22 33", "j.doe@email.com");
+
+        when(studentRepository.existsByEmail(studentRequestDto.eMail())).thenReturn(false);
+        when(studentRepository.save(any(StudentModel.class))).thenReturn(studentModel);
+
+        StudentResponseDto responseDto = studentService.create(studentRequestDto);
+
+        assertThat(responseDto).isNotNull();
+        assertEquals(studentModel.toDto(), responseDto);
+        verify(studentRepository).save(any(StudentModel.class));
+    }
+
+    @Test
     @DisplayName("Should Return Exeption By Email")
     void shouldReturnExeptionByEmail() {
-
         StudentRequestDto studentRequestDto = new StudentRequestDto(1, "John", "Doe", "+52 123 11 22 33",
                 "j.doe@email.com");
         StudentModel studentModel = studentRequestDto.toModel();
         when(studentRepository.existsByEmail(studentModel.getEmail())).thenReturn(true);
 
         assertThrows(BusinessException.class, () -> studentService.create(studentRequestDto));
-
     }
 
     @Test
+    @DisplayName("Should delete student by id")
     void testDeleteById() {
+        Integer id = 1;
 
+        studentService.deleteById(id);
+
+        verify(studentRepository).deleteById(id);
     }
 
     @Test
@@ -66,5 +88,15 @@ public class StudentServiceTest {
         when(studentRepository.findById(id)).thenReturn(Optional.of(studentModel));
         StudentResponseDto studentResponseDto = studentService.findById(id);
         assertEquals(studentModel.toDto(), studentResponseDto);
+    }
+
+    @Test
+    @DisplayName("Should throw BusinessException when student id not found")
+    void shouldThrowExceptionWhenStudentNotFound() {
+        Integer id = 99;
+        when(studentRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(BusinessException.class, () -> studentService.findById(id));
+        verify(studentRepository).findById(id);
     }
 }
