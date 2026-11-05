@@ -1,8 +1,7 @@
 package com.base_student.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,70 +32,109 @@ public class StudentServiceTest {
     private StudentService studentService;
 
     @Test
-    @DisplayName("Should create student successfully when email is unique")
-    void shouldCreateStudentSuccessfully() {
-        StudentRequestDto studentRequestDto = new StudentRequestDto(null, "John", "Doe", "+52 123 11 22 33",
-                "j.doe@email.com");
-        StudentModel studentModel = new StudentModel(1, "John", "Doe", "+52 123 11 22 33", "j.doe@email.com");
+    @DisplayName("Prueba de create: Validación correcta de persistencia y verificación de atributos")
+    void testCreate() {
+        StudentRequestDto requestDto = new StudentRequestDto(null, "John", "Doe", "+52 123 11 22 33", "j.doe@email.com");
+        StudentModel savedModel = new StudentModel(1, "John", "Doe", "+52 123 11 22 33", "j.doe@email.com");
 
-        when(studentRepository.existsByEmail(studentRequestDto.eMail())).thenReturn(false);
-        when(studentRepository.save(any(StudentModel.class))).thenReturn(studentModel);
+        when(studentRepository.existsByEmail(requestDto.eMail())).thenReturn(false);
+        when(studentRepository.save(any(StudentModel.class))).thenReturn(savedModel);
 
-        StudentResponseDto responseDto = studentService.create(studentRequestDto);
+        StudentResponseDto responseDto = studentService.create(requestDto);
 
         assertThat(responseDto).isNotNull();
-        assertEquals(studentModel.toDto(), responseDto);
+        assertThat(responseDto.id()).isEqualTo(1);
+        assertThat(responseDto.name()).isEqualTo("John");
+        assertThat(responseDto.lastName()).isEqualTo("Doe");
+        assertThat(responseDto.phone()).isEqualTo("+52 123 11 22 33");
+        assertThat(responseDto.eMail()).isEqualTo("j.doe@email.com");
+
+        verify(studentRepository).existsByEmail(requestDto.eMail());
         verify(studentRepository).save(any(StudentModel.class));
     }
 
     @Test
-    @DisplayName("Should Return Exeption By Email")
-    void shouldReturnExeptionByEmail() {
-        StudentRequestDto studentRequestDto = new StudentRequestDto(1, "John", "Doe", "+52 123 11 22 33",
-                "j.doe@email.com");
-        StudentModel studentModel = studentRequestDto.toModel();
-        when(studentRepository.existsByEmail(studentModel.getEmail())).thenReturn(true);
+    @DisplayName("Prueba de create: Debería lanzar BusinessException cuando el correo ya existe")
+    void testCreateDuplicateEmailThrowsException() {
+        StudentRequestDto requestDto = new StudentRequestDto(1, "John", "Doe", "+52 123 11 22 33", "j.doe@email.com");
 
-        assertThrows(BusinessException.class, () -> studentService.create(studentRequestDto));
+        when(studentRepository.existsByEmail(requestDto.eMail())).thenReturn(true);
+
+        assertThatThrownBy(() -> studentService.create(requestDto))
+                .isInstanceOf(BusinessException.class);
+
+        verify(studentRepository).existsByEmail(requestDto.eMail());
     }
 
     @Test
-    @DisplayName("Should delete student by id")
+    @DisplayName("Prueba de findAll: Simulación adecuada del repositorio y validación exitosa de la lista recuperada")
+    void testFindAll() {
+        StudentModel student1 = new StudentModel(1, "Floor", "Jansen", "+52 123 11 22 33", "f.jansen@gmail.com");
+        StudentModel student2 = new StudentModel(2, "Tarja", "Turunen", "+52 123 44 55 66", "t.turunen@gmail.com");
+
+        when(studentRepository.findAll()).thenReturn(List.of(student1, student2));
+
+        List<StudentResponseDto> responseDtos = studentService.findAll();
+
+        assertThat(responseDtos)
+                .isNotNull()
+                .hasSize(2);
+
+        assertThat(responseDtos.get(0).id()).isEqualTo(1);
+        assertThat(responseDtos.get(0).name()).isEqualTo("Floor");
+        assertThat(responseDtos.get(0).lastName()).isEqualTo("Jansen");
+        assertThat(responseDtos.get(0).phone()).isEqualTo("+52 123 11 22 33");
+        assertThat(responseDtos.get(0).eMail()).isEqualTo("f.jansen@gmail.com");
+
+        assertThat(responseDtos.get(1).id()).isEqualTo(2);
+        assertThat(responseDtos.get(1).name()).isEqualTo("Tarja");
+        assertThat(responseDtos.get(1).lastName()).isEqualTo("Turunen");
+        assertThat(responseDtos.get(1).phone()).isEqualTo("+52 123 44 55 66");
+        assertThat(responseDtos.get(1).eMail()).isEqualTo("t.turunen@gmail.com");
+
+        verify(studentRepository).findAll();
+    }
+
+    @Test
+    @DisplayName("Prueba de findById: Retorna el estudiante correspondiente cuando el ID existe")
+    void testFindById() throws BusinessException {
+        Integer id = 1;
+        StudentModel studentModel = new StudentModel(id, "John", "Doe", "+52 123 11 22 33", "j.doe@mail.com");
+
+        when(studentRepository.findById(id)).thenReturn(Optional.of(studentModel));
+
+        StudentResponseDto responseDto = studentService.findById(id);
+
+        assertThat(responseDto).isNotNull();
+        assertThat(responseDto.id()).isEqualTo(1);
+        assertThat(responseDto.name()).isEqualTo("John");
+        assertThat(responseDto.lastName()).isEqualTo("Doe");
+        assertThat(responseDto.phone()).isEqualTo("+52 123 11 22 33");
+        assertThat(responseDto.eMail()).isEqualTo("j.doe@mail.com");
+
+        verify(studentRepository).findById(id);
+    }
+
+    @Test
+    @DisplayName("Prueba de findById: Lanza BusinessException cuando el ID no existe")
+    void testFindByIdNotFound() {
+        Integer id = 99;
+
+        when(studentRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> studentService.findById(id))
+                .isInstanceOf(BusinessException.class);
+
+        verify(studentRepository).findById(id);
+    }
+
+    @Test
+    @DisplayName("Prueba de deleteById: Invoca la eliminación en el repositorio")
     void testDeleteById() {
         Integer id = 1;
 
         studentService.deleteById(id);
 
         verify(studentRepository).deleteById(id);
-    }
-
-    @Test
-    @DisplayName("should Return Student List")
-    void shouldReturnStudentList() {
-        List<StudentModel> studentModelList = List.of(
-                new StudentModel(1, "Floor", "Jansen", "+52 123 11 22 33", "f.jansen@gmail.com"));
-        when(studentRepository.findAll()).thenReturn(studentModelList);
-        List<StudentResponseDto> responseDtos = studentService.findAll();
-        assertThat(responseDtos).hasSize(1);
-    }
-
-    @Test
-    @DisplayName("Should return a student by id")
-    void shouldReturnStudentById() {
-        Integer id = 1;
-        StudentModel studentModel = new StudentModel(1, "John", "Doe", "+52 123 11 22 33", "j.doe@mail.com");
-        when(studentRepository.findById(id)).thenReturn(Optional.of(studentModel));
-        StudentResponseDto studentResponseDto = studentService.findById(id);
-        assertEquals(studentModel.toDto(), studentResponseDto);
-    }
-
-    @Test
-    @DisplayName("Should throw BusinessException when student id not found")
-    void shouldThrowExceptionWhenStudentNotFound() {
-        Integer id = 99;
-        when(studentRepository.findById(id)).thenReturn(Optional.empty());
-
-        assertThrows(BusinessException.class, () -> studentService.findById(id));
-        verify(studentRepository).findById(id);
     }
 }
